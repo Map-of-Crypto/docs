@@ -1,0 +1,31 @@
+type = "directrequest"
+schemaVersion = 1
+name = "test10"
+externalJobID = "30d1b83d-2601-4da9-b54d-60ced7b98ae3"
+maxTaskDuration = "0s"
+contractAddress = "0x74d40EAE0E54Ea30178625c111CEDBf9069e6189"
+minIncomingConfirmations = 0
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+    fetchProducts        [type="http" method=GET url="$(decode_cbor.productURL)"]
+    parseCurrency        [type="jsonparse" path="product,currency" data="$(fetchProducts)"]
+    parsePrice        [type="jsonparse" path="product,price" data="$(fetchProducts)"]
+
+    encode_large [type="ethabiencode"
+                abi="(bytes32 requestId, bytes currency, uint256 price)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"currency\\": $(parseCurrency), \\"price\\": $(parsePrice)}"
+                ]
+    encode_tx  [type="ethabiencode"
+                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_large)}"
+                ]
+
+    submit_tx    [type="ethtx" to="0x74d40EAE0E54Ea30178625c111CEDBf9069e6189" data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> fetchProducts -> parseCurrency-> parsePrice  ->encode_large -> encode_tx -> submit_tx
+"""
