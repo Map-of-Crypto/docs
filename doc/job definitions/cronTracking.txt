@@ -1,0 +1,24 @@
+type = "cron"
+schemaVersion = 1
+name = "cron get tracking"
+externalJobID = "0aea178f-7d10-448d-ae97-7dab4dd41cd2"
+maxTaskDuration = "0s"
+schedule = "CRON_TZ=UTC @every 1m"
+observationSource = """
+    fetch    [type="http" method=GET url="https://mapofcrypto-cdppi36oeq-uc.a.run.app/trackingNeedFunding"]
+    parse   [type="jsonparse" path="mockTracking,0" data="$(fetch)"]
+    multiply [type="multiply" times=100]
+
+    encode_response [type="ethabiencode"
+             abi="(uint256 data)"
+             data="{\\"data\\": $(multiply ) }"] 
+   encode_tx [type="ethabiencode"
+              abi="cronExecution(bytes32 data)"
+              data="{ \\"data\\": $(encode_response) }"]
+
+   submit_tx  [type="ethtx"
+               to="0xCda33706Ef75E46e5F645CbAd389CA8EA04184A6"  // contract address
+               data="$(encode_tx)"]
+
+    fetch -> parse -> multiply ->encode_response -> encode_tx -> submit_tx
+"""
