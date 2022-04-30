@@ -1,13 +1,13 @@
 type = "cron"
 schemaVersion = 1
 name = "cron get tracking"
-externalJobID = "977a7a03-d941-44b9-8482-b921b469858d"
+externalJobID = "66853ba4-0669-4258-ab47-7e707675f0fa"
 maxTaskDuration = "0s"
 schedule = "CRON_TZ=UTC @every 1m"
 observationSource = """
-    fetch    [type="bridge" name="test"]
-    parse   [type="jsonparse" path="data,mockTracking,0" data="$(fetch)"]
-    multiply [type="multiply" times=10]
+    fetch    [type="bridge"  name="funding"]
+    parse   [type="jsonparse" path="data,0" data="$(fetch)"]
+    multiply [type="multiply" times=100]
 
     encode_response [type="ethabiencode"
              abi="(uint256 data)"
@@ -17,7 +17,7 @@ observationSource = """
               data="{ \\"data\\": $(encode_response) }"]
 
    submit_tx  [type="ethtx"
-               to="0x350514993a29137D17641cea914f5f67e1E95184"
+               to="0xcb2E631887B15B815AD02aE88Dc0326374f37b16"  // contract address
                data="$(encode_tx)"]
 
     fetch -> parse -> multiply ->encode_response -> encode_tx -> submit_tx
