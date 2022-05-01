@@ -6,19 +6,18 @@ maxTaskDuration = "0s"
 schedule = "CRON_TZ=UTC @every 1m"
 observationSource = """
     fetch    [type="bridge"  name="funding"]
-    parse   [type="jsonparse" path="data,0" data="$(fetch)"]
-    multiply [type="multiply" times=100]
+    parse   [type="jsonparse" path="data" data="$(fetch)"]
 
     encode_response [type="ethabiencode"
-             abi="(uint256 data)"
-             data="{\\"data\\": $(multiply ) }"] 
+             abi="(uint256[] data)"
+             data="{\\"data\\": $(parse) }"] 
    encode_tx [type="ethabiencode"
-              abi="cronExecution(bytes32 data)"
+              abi="cronExecution(bytes data)"
               data="{ \\"data\\": $(encode_response) }"]
 
    submit_tx  [type="ethtx"
-               to="0xcb2E631887B15B815AD02aE88Dc0326374f37b16"  // contract address
+               to="0x2B4574C412C28a667f5E5a878874ff0B83044aE6"  // contract address
                data="$(encode_tx)"]
 
-    fetch -> parse -> multiply ->encode_response -> encode_tx -> submit_tx
+    fetch -> parse -> encode_response -> encode_tx -> submit_tx
 """
