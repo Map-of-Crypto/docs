@@ -1,7 +1,7 @@
 type = "cron"
 schemaVersion = 1
-name = "cron get tracking"
-externalJobID = "66853ba4-0669-4258-ab47-7e707675f0fa"
+name = "checkNeedPayment"
+externalJobID = "49456cb2-3266-47ed-9af1-62de450e2f41"
 maxTaskDuration = "0s"
 schedule = "CRON_TZ=UTC @every 1m"
 observationSource = """
@@ -12,11 +12,11 @@ observationSource = """
              abi="(uint256[] data)"
              data="{\\"data\\": $(parse) }"] 
    encode_tx [type="ethabiencode"
-              abi="cronExecution(bytes data)"
+              abi="checkNeedPayment(bytes data)"
               data="{ \\"data\\": $(encode_response) }"]
 
    submit_tx  [type="ethtx"
-               to="0x2B4574C412C28a667f5E5a878874ff0B83044aE6"  // contract address
+               to="0x0fa5BC63193AC88d0aE99AA36F7F01043ba04972"  // contract address
                data="$(encode_tx)"]
 
     fetch -> parse -> encode_response -> encode_tx -> submit_tx
