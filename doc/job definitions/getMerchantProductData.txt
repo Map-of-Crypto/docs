@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
-name = "test10"
-externalJobID = "30d1b83d-2601-4da9-b54d-60ced7b98ae3"
+name = "getMerchantProductData"
+externalJobID = "e36caa3f-f82e-4ad6-b6df-65b01c6382b7"
 maxTaskDuration = "0s"
 contractAddress = "0x74d40EAE0E54Ea30178625c111CEDBf9069e6189"
 minIncomingConfirmations = 0
@@ -13,12 +13,16 @@ observationSource = """
 
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
     fetchProducts        [type="http" method=GET url="$(decode_cbor.productURL)"]
+    fetchMerchant        [type="http" method=GET url="$(decode_cbor.merchantURL)"]  
+
     parseCurrency        [type="jsonparse" path="product,currency" data="$(fetchProducts)"]
     parsePrice        [type="jsonparse" path="product,price" data="$(fetchProducts)"]
+    parseProductId        [type="jsonparse" path="product,id" data="$(fetchProducts)"]
+    parseMerchantAddress   [type="jsonparse" path="merchant,address" data="$(fetchMerchant)"]
 
     encode_large [type="ethabiencode"
-                abi="(bytes32 requestId, bytes currency, uint256 price)"
-                data="{\\"requestId\\": $(decode_log.requestId), \\"currency\\": $(parseCurrency), \\"price\\": $(parsePrice)}"
+                abi="(bytes32 requestId, bytes currency, address merchantAddress, uint256 price, uint256 productId)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"currency\\": $(parseCurrency), \\"merchantAddress\\": $(parseMerchantAddress), \\"price\\": $(parsePrice), \\"productId\\": $(parseProductId)}"
                 ]
     encode_tx  [type="ethabiencode"
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
@@ -27,5 +31,5 @@ observationSource = """
 
     submit_tx    [type="ethtx" to="0x74d40EAE0E54Ea30178625c111CEDBf9069e6189" data="$(encode_tx)"]
 
-    decode_log -> decode_cbor -> fetchProducts -> parseCurrency-> parsePrice  ->encode_large -> encode_tx -> submit_tx
+    decode_log -> decode_cbor -> fetchProducts -> fetchMerchant-> parseCurrency-> parsePrice  -> parseProductId->parseMerchantAddress   ->encode_large -> encode_tx -> submit_tx
 """
