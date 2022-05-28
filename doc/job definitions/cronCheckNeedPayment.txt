@@ -16,7 +16,7 @@ observationSource = """
               data="{ \\"data\\": $(encode_response) }"]
 
    submit_tx  [type="ethtx"
-               to="0x6ed0039582D833756A87B347A978ECC6652ff028"  // contract address
+               to="0x112c52d7dC38CE4708679ABFdc4699965CA4a377"  // contract address
                data="$(encode_tx)"]
 
     fetch -> parse -> encode_response -> encode_tx -> submit_tx
