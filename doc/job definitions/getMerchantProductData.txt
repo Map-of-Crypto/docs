@@ -1,9 +1,9 @@
 type = "directrequest"
 schemaVersion = 1
-name = "getMerchantProductData"
-externalJobID = "e36caa3f-f82e-4ad6-b6df-65b01c6382b7"
+name = "getProductData"
+externalJobID = "84ec9e21-4773-4b22-b4f3-71b74fda66ef"
 maxTaskDuration = "0s"
-contractAddress = "0x74d40EAE0E54Ea30178625c111CEDBf9069e6189"
+contractAddress = "0x6A020c9A35D1022bC55450E9D6c847bc0deA9c73"
 minIncomingConfirmations = 0
 observationSource = """
     decode_log   [type="ethabidecodelog"
@@ -13,12 +13,11 @@ observationSource = """
 
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
     fetchProducts        [type="http" method=GET url="$(decode_cbor.productURL)"]
-    fetchMerchant        [type="http" method=GET url="$(decode_cbor.merchantURL)"]  
 
     parseCurrency        [type="jsonparse" path="product,currency" data="$(fetchProducts)"]
     parsePrice        [type="jsonparse" path="product,price" data="$(fetchProducts)"]
     parseProductId        [type="jsonparse" path="product,id" data="$(fetchProducts)"]
-    parseMerchantAddress   [type="jsonparse" path="merchant,address" data="$(fetchMerchant)"]
+    parseMerchantAddress   [type="jsonparse" path="product,merchant" data="$(fetchProducts)"]
 
     encode_large [type="ethabiencode"
                 abi="(bytes32 requestId, bytes currency, address merchantAddress, uint256 price, uint256 productId)"
@@ -29,7 +28,7 @@ observationSource = """
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_large)}"
                 ]
 
-    submit_tx    [type="ethtx" to="0x74d40EAE0E54Ea30178625c111CEDBf9069e6189" data="$(encode_tx)"]
+    submit_tx    [type="ethtx" to="0x6A020c9A35D1022bC55450E9D6c847bc0deA9c73" data="$(encode_tx)"]
 
-    decode_log -> decode_cbor -> fetchProducts -> fetchMerchant-> parseCurrency-> parsePrice  -> parseProductId->parseMerchantAddress   ->encode_large -> encode_tx -> submit_tx
+    decode_log -> decode_cbor -> fetchProducts ->  parseCurrency-> parsePrice  -> parseProductId->parseMerchantAddress   ->encode_large -> encode_tx -> submit_tx
 """
