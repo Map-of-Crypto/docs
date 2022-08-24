@@ -18,8 +18,8 @@ observationSource = """
     parseProductId        [type="jsonparse" path="id" data="$(fetchProducts)"]
 
     encode_large [type="ethabiencode"
-                abi="(bytes32 requestId, bytes currency, address merchantAddress, uint256 price, uint256 productId)"
-                data="{\\"requestId\\": $(decode_log.requestId), \\"currency\\": $(parseCurrency), \\"merchantAddress\\": $(parseMerchantAddress), \\"price\\": $(parsePrice), \\"productId\\": $(parseProductId)}"
+                abi="(bytes32 requestId, uint256 price, uint256 productId)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"price\\": $(parsePrice), \\"productId\\": $(parseProductId)}"
                 ]
     encode_tx  [type="ethabiencode"
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
