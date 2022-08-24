@@ -14,10 +14,8 @@ observationSource = """
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
     fetchProducts        [type="http" method=GET url="$(decode_cbor.productURL)"]
 
-    parseCurrency        [type="jsonparse" path="product,currency" data="$(fetchProducts)"]
-    parsePrice        [type="jsonparse" path="product,price" data="$(fetchProducts)"]
-    parseProductId        [type="jsonparse" path="product,id" data="$(fetchProducts)"]
-    parseMerchantAddress   [type="jsonparse" path="product,merchant" data="$(fetchProducts)"]
+    parsePrice        [type="jsonparse" path="price" data="$(fetchProducts)"]
+    parseProductId        [type="jsonparse" path="id" data="$(fetchProducts)"]
 
     encode_large [type="ethabiencode"
                 abi="(bytes32 requestId, bytes currency, address merchantAddress, uint256 price, uint256 productId)"
@@ -30,5 +28,5 @@ observationSource = """
 
     submit_tx    [type="ethtx" to="0x6A020c9A35D1022bC55450E9D6c847bc0deA9c73" data="$(encode_tx)"]
 
-    decode_log -> decode_cbor -> fetchProducts ->  parseCurrency-> parsePrice  -> parseProductId->parseMerchantAddress   ->encode_large -> encode_tx -> submit_tx
+    decode_log -> decode_cbor -> fetchProducts ->   parsePrice  -> parseProductId->encode_large -> encode_tx -> submit_tx
 """
